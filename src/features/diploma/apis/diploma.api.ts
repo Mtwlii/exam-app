@@ -8,13 +8,24 @@ import type {
   IPaginationApiResponse,
 } from "../../../shared/types/api";
 
-export async function getDiplomaListApi(params: URLSearchParams) {
-  const response = await fetch("/api/diploma/list?" + params.toString());
+export async function getdiplomaApi(params: URLSearchParams) {
+  const response = await fetch("/api/diplomas?" + params.toString());
   const payload: IApiResponse<IPaginationApiResponse<IDiplomaItem[]>> =
     await response.json();
 
   if (!payload.status) {
-    throw new Error("Failed to fetch diploma list");
+    throw new Error("Failed to fetch diploma details: " + payload.message);
+  }
+
+  return payload;
+}
+
+export async function getDiplomaDetailsApi(id: string) {
+  const response = await fetch(`/api/diplomas/${id}`);
+  const payload: IApiResponse<IDiplomaItem> = await response.json();
+
+  if (!payload.status) {
+    throw new Error("Failed to fetch diploma details: " + payload.message);
   }
 
   return payload;

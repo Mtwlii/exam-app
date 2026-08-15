@@ -1,7 +1,7 @@
-import { useDiplomaList } from "../../../apis/queries/use-diploma-list";
+import useDiploma from "../../../apis/queries/use-diploma";
 export default function DiplomaListTable() {
   const searchParams = new URLSearchParams();
-  const { isLoading, data, error } = useDiplomaList(searchParams);
+  const { isLoading, data, error } = useDiploma(searchParams);
   console.log(data, "data in table");
   return (
     <div>
