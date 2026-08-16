@@ -4,6 +4,7 @@ import AuthLayout from "../../layout/AuthLayout";
 import StepIndicator from "../../layout/StepIndicator";
 import { useMultiStepForm } from "../../../hooks/use-multi-step-form";
 import { useRegister } from "../../../apis/mutations/use-register";
+import { useAuth } from "../../../context/auth-context";
 import EmailStep from "./email-step";
 import VerifyEmailStep from "./verify-email-step";
 import UserInfoStep from "./user-info-step";
@@ -18,17 +19,27 @@ import type {
 const REGISTER_STEPS = ["email", "verify-email", "user-info", "password"] as const;
 type RegisterStep = (typeof REGISTER_STEPS)[number];
 
-
+/**
+ * src/features/auth/components/forms/register/register-form.tsx
+ *
+ * Orchestrates the 4 steps and accumulates their data into one
+ * payload, submitted on the final step via POST /api/auth/register.
+ *
+ * Body shape confirmed from Swagger:
+ * { username, email, password, confirmPassword, firstName, lastName, phone }
+ */
 export default function RegisterForm() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const { currentStep, stepIndex, totalSteps, goNext, goBack } =
     useMultiStepForm<RegisterStep>(REGISTER_STEPS);
-  const navigate = useNavigate();
-  const registerMutation = useRegister();
 
-  const [serverError, setServerError] = useState<string | null>(null);
   const [formData, setFormData] = useState<
     Partial<EmailStepValues & UserInfoStepValues>
   >({});
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const { mutate: register, isPending } = useRegister();
 
   const handleEmailNext = (data: EmailStepValues) => {
     setFormData((prev) => ({ ...prev, ...data }));
@@ -36,7 +47,6 @@ export default function RegisterForm() {
   };
 
   const handleVerifyNext = () => {
-    // OTP itself isn't part of the final payload, just gates progression
     goNext();
   };
 
@@ -45,22 +55,29 @@ export default function RegisterForm() {
     goNext();
   };
 
+  const handleBackFromPassword = () => {
+    setServerError(null);
+    goBack();
+  };
+
   const handleFinalSubmit = (data: PasswordStepValues) => {
     const payload: RegisterPayload = {
       ...(formData as EmailStepValues & UserInfoStepValues),
       ...data,
     };
-    registerMutation.mutate(payload, {
-      onSuccess: (res) => {
-        if (!res.status) {
-          setServerError(res.message ?? "Registration failed");
+
+    register(payload, {
+      onSuccess: (result) => {
+        if (!result.status) {
+          setServerError(result.message ?? "Registration failed");
           return;
         }
+        login(result.payload.token, result.payload.user);
         navigate("/login");
       },
       onError: (error) => {
         setServerError(
-          error instanceof Error ? error.message : "Network error"
+          error instanceof Error ? error.message : "Something went wrong"
         );
       },
     });
@@ -79,25 +96,30 @@ export default function RegisterForm() {
           />
         );
       case "user-info":
-        return <UserInfoStep onNext={handleUserInfoNext} onBack={goBack} />;
+        return (
+          <UserInfoStep
+            onNext={handleUserInfoNext}
+            onBack={goBack}
+            defaultValues={formData as Partial<UserInfoStepValues>}
+          />
+        );
       case "password":
         return (
           <PasswordStep
             onSubmitFinal={handleFinalSubmit}
-            onBack={goBack}
-            isSubmittingFinal={registerMutation.isPending}
+            isSubmittingFinal={isPending}
             serverError={serverError}
+            onBack={handleBackFromPassword}
           />
         );
     }
   };
 
-
   return (
- <AuthLayout
-  header={<StepIndicator totalSteps={totalSteps} currentIndex={stepIndex} />}
->
-  {renderStep()}
-</AuthLayout>
+    <AuthLayout
+      header={<StepIndicator totalSteps={totalSteps} currentIndex={stepIndex} />}
+    >
+      {renderStep()}
+    </AuthLayout>
   );
 }

@@ -16,7 +16,7 @@ export const loginSchema = z.object({
     .min(1, "Password is required")
     .min(6, "Password must be at least 6 characters"),
 });
-export type ILoginFormValues = z.infer<typeof loginSchema>;
+export type LoginFormValues = z.infer<typeof loginSchema>;
 
 // ---- Register: Step 1 - Email ----
 export const emailStepSchema = z.object({
@@ -41,7 +41,7 @@ export const userInfoStepSchema = z.object({
   phone: z
     .string()
     .min(1, "Phone number is required")
-    .regex(/^\+?\d{8,15}$/, "Enter a valid phone number"),
+    .regex(/^\+\d{8,15}$/, "Enter a valid phone number"),
 });
 export type UserInfoStepValues = z.infer<typeof userInfoStepSchema>;
 

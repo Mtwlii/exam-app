@@ -10,19 +10,6 @@ import type {
   IConfirmEmailVerificationResponse,
 } from "../types/auth";
 
-export async function registerApi(values: IRegisterValues) {
-  const response = await fetch("/api/auth/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(values),
-  });
-  const data: IApiResponse<IRegisterResponse> = await response.json();
-
-  return data;
-}
-
 export async function loginApi(values: ILoginValues) {
   const response = await fetch("/api/auth/login", {
     method: "POST",
@@ -32,6 +19,21 @@ export async function loginApi(values: ILoginValues) {
     body: JSON.stringify(values),
   });
   const data: IApiResponse<ILoginResponse> = await response.json();
+  return data;
+}
+
+export async function registerApi(values: IRegisterValues) {
+  const response = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(values),
+  });
+  const data: IApiResponse<IRegisterResponse> = await response.json();
+  //   if (data.status) {
+  //    data.payload.token
+  //   }
   return data;
 }
 

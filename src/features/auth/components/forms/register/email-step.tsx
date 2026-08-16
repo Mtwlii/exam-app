@@ -1,15 +1,21 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ChevronRight } from "lucide-react";
 import { emailStepSchema, type EmailStepValues } from "@/schemas/auth.schema";
-import { useSendEmailVerification } from "@/features/auth/apis/mutations/use-send-email-verification";
+import { useSendEmailVerification } from "../../../apis/mutations/use-send-email-verification";
 
 interface EmailStepProps {
   onNext: (data: EmailStepValues) => void;
   defaultEmail?: string;
 }
 
-
-export default function EmailStep({ onNext, defaultEmail = "" }: EmailStepProps) {
+/**
+ * src/features/auth/components/forms/register/email-step.tsx
+ */
+export default function EmailStep({
+  onNext,
+  defaultEmail = "",
+}: EmailStepProps) {
   const {
     register,
     handleSubmit,
@@ -25,7 +31,6 @@ export default function EmailStep({ onNext, defaultEmail = "" }: EmailStepProps)
   const onSubmit = (values: EmailStepValues) => {
     mutate(values, {
       onSuccess: (data) => {
-
         if (!data.status) {
           setError("email", {
             type: "manual",
@@ -46,17 +51,21 @@ export default function EmailStep({ onNext, defaultEmail = "" }: EmailStepProps)
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      <h2 className="text-2xl font-bold text-slate-900 mb-2">Create Account</h2>
-      <p className="text-sm text-slate-500 mb-8">Let's start with your email.</p>
+      <h2 className="text-2xl font-bold text-gray-800 mb-8">
+        Create Account
+      </h2>
 
       <div className="mb-6">
-        <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">
+        <label
+          htmlFor="email"
+          className="block text-sm font-medium text-slate-700 mb-1.5"
+        >
           Email
         </label>
         <input
           id="email"
           type="email"
-          placeholder="you@example.com"
+          placeholder="john@example.com"
           {...register("email")}
           aria-invalid={!!errors.email}
           className={`w-full rounded-md border px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 transition ${
@@ -73,14 +82,25 @@ export default function EmailStep({ onNext, defaultEmail = "" }: EmailStepProps)
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-md bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition text-white text-sm font-semibold py-2.5"
+        style={{ height: 46 }}
+        className="w-full flex items-center justify-center gap-2.5 rounded-md border bg-[#EFF6FF] border-[#155DFC] text-[#155DFC] text-sm font-semibold disabled:opacity-60 transition hover:bg-blue-100"
       >
-        {isPending ? "Sending code..." : "Next →"}
+        {isPending ? (
+          "Sending code..."
+        ) : (
+          <>
+            Next
+            <ChevronRight className="w-4 h-4" />
+          </>
+        )}
       </button>
 
       <p className="text-center text-sm text-slate-500 mt-5">
         Already have an account?{" "}
-        <a href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+        <a
+          href="/login"
+          className="text-blue-600 hover:text-blue-700 font-medium"
+        >
           Login
         </a>
       </p>

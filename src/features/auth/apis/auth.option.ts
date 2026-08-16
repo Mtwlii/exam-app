@@ -5,6 +5,10 @@ import {
   confirmEmailVerificationApi,
 } from "./auth.api";
 
+/**
+ * src/features/auth/apis/auth.option.ts
+ */
+
 export const registerMutationOptions = () => {
   return {
     mutationFn: registerApi,
